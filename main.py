@@ -3,9 +3,13 @@ import sqlite3
 import whois
 from datetime import datetime
 import re
+from dotenv import load_dotenv
+import os
+# Load environment variables
+load_dotenv()
 
 # Initialize bot with your token
-bot = telebot.TeleBot('7827354026:AAEW45rcGFpf38-Ui0KVB4rEBQ8RrbAUzPk')
+bot = telebot.TeleBot(os.getenv('BOT_TOKEN'))
 
 # Database initialization
 def init_db():
