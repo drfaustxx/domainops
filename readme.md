@@ -4,7 +4,7 @@ A Telegram bot that helps you track domain expiration dates and sends notificati
 
 You can run this bot on any server that has a public IP address.
 
-And also use my bot: https://t.me/domainops_bot
+And also you can use my bot: https://t.me/domainops_bot
 
 ## Features
 
@@ -43,6 +43,7 @@ pip3 install -r requirements.txt
 
 ```bash
 cp .env.example .env
+nano .env
 ```
 
 4. Set up your cron job to run the bot daily:
@@ -50,8 +51,9 @@ cp .env.example .env
 ```bash
 chmod +x check_expiry.py
 crontab -e
-```
+
 0 9 * * * /usr/bin/python3 /usr/local/domainops/check_expiry.py
+```
 
 5. Run the bot as a service:
 
