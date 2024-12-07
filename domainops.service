@@ -1,0 +1,14 @@
+[Unit]
+Description=DomainOps Bot Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /usr/local/domainops/bot.py
+WorkingDirectory=/usr/local/domainops/
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
