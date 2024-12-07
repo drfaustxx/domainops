@@ -19,6 +19,14 @@ def init_db():
                   whois_info TEXT,
                   is_deleted INTEGER DEFAULT 0,
                   last_checked TIMESTAMP)''')
+    
+    # Add new message_logs table
+    c.execute('''CREATE TABLE IF NOT EXISTS message_logs
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  user_id INTEGER NOT NULL,
+                  message_text TEXT NOT NULL,
+                  command TEXT,
+                  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
     conn.commit()
     conn.close()
 
@@ -29,13 +37,28 @@ def is_valid_domain(domain):
     pattern = r'^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$'
     return bool(re.match(pattern, domain))
 
+# Add this helper function to log messages
+def log_message(message):
+    conn = sqlite3.connect('domains.db')
+    try:
+        command = message.text.split()[0] if message.text.startswith('/') else None
+        c = conn.cursor()
+        c.execute("""INSERT INTO message_logs (user_id, message_text, command) 
+                    VALUES (?, ?, ?)""",
+                 (message.from_user.id, message.text, command))
+        conn.commit()
+    finally:
+        conn.close()
+
 # Command handlers
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
+    log_message(message)
     bot.reply_to(message, "Welcome! Use /help to see available commands.")
 
 @bot.message_handler(commands=['help'])
 def send_help(message):
+    log_message(message)
     help_text = """
 Available commands:
 /add <domain> - Add a new domain
@@ -48,6 +71,7 @@ Available commands:
 
 @bot.message_handler(commands=['add'])
 def add_domain(message):
+    log_message(message)
     conn = sqlite3.connect('domains.db')
     try:
         domain = message.text.split()[1].lower()
@@ -75,6 +99,7 @@ def add_domain(message):
 
 @bot.message_handler(commands=['list'])
 def list_domains(message):
+    log_message(message)
     conn = sqlite3.connect('domains.db')
     c = conn.cursor()
     c.execute("SELECT domain, expiry_date FROM domains WHERE user_id=? AND is_deleted=0", 
@@ -94,6 +119,7 @@ def list_domains(message):
 
 @bot.message_handler(commands=['delete'])
 def delete_domain(message):
+    log_message(message)
     conn = sqlite3.connect('domains.db')
     try:
         domain = message.text.split()[1].lower()
@@ -112,6 +138,7 @@ def delete_domain(message):
 
 @bot.message_handler(commands=['check', 'checkall'])
 def check_domains(message):
+    log_message(message)
     conn = sqlite3.connect('domains.db')
     c = conn.cursor()
     
